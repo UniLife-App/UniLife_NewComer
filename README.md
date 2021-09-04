@@ -1,3 +1,4 @@
 # UniLife_NewComer
 
-Initialize new comers' tags.
+input: (String) 1 3 5 7 9
+output: (dict)  {'娛樂': 1, '生活': 1, '體育': 0, '教育': 0, '情感': 0, '藝文': 1, 'ACG': 0, '財經': 4, '時事': 2, '議題': 0, '科技': 4, '職場': 4}
