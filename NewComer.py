@@ -6,7 +6,9 @@ import pandas as pd
 import copy
 import sys
 
-
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
 dictInterestCate ={
     "寵物" : ["娛樂", "生活"],
@@ -121,21 +123,28 @@ def getUserScore(dictUserCateCnt, dictTtlCateCount, dictIniUserCateScore):
 
 
 def main(argv):
-    userInterestArray = []
-    for i in range(1,len(argv)):
-        userInterestArray.append(int(argv[i]))
-    print("userInterestArray: ", userInterestArray)
-    
-    dictTtlCateCount = getTtlCateCount(dictInterestCate)  
-             
-    dictIniUserCateCnt = getIniUserCateCnt(dictTtlCateCount) 
-    
-    
-    dictIniUserCateScore = getIniUserCateScore(dictTtlCateCount)  
-    dictUserCateCnt = getUserCate(userInterestArray, dictInterestCate, dictIntestMap, dictIniUserCateCnt)
-    dictUserScore = getUserScore(dictUserCateCnt, dictTtlCateCount, dictIniUserCateScore)
-    print("dictUserScore: ", dictUserScore)
-    return dictUserScore
+    cred = credentials.Certificate("service-account-file.json")
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    for snapshot in db.collection('users').get():
+        data = snapshot.to_dict()
+        if 'interests' in data.keys():
+            userInterestArray = data['interests']
+            print("userInterestArray: ", userInterestArray)
+            
+            dictTtlCateCount = getTtlCateCount(dictInterestCate)  
+                    
+            dictIniUserCateCnt = getIniUserCateCnt(dictTtlCateCount) 
+            
+            
+            dictIniUserCateScore = getIniUserCateScore(dictTtlCateCount)  
+            dictUserCateCnt = getUserCate(userInterestArray, dictInterestCate, dictIntestMap, dictIniUserCateCnt)
+            dictUserScore = getUserScore(dictUserCateCnt, dictTtlCateCount, dictIniUserCateScore)
+            print("dictUserScore: ", dictUserScore)
+            snapshot.reference.update({
+                'score': dictUserScore
+            })
+    return
 
 
 if __name__ == '__main__':
